@@ -26,80 +26,95 @@
             box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
             position: relative;
             overflow: hidden;
+            min-height: 600px;
+        }
+
+        /* --- NEW: START SCREEN --- */
+        #start-screen {
             background-image: url('stage.jpg');
             background-size: cover;
             background-position: center;
-        }
-
-        /* Dark Overlay for Menus */
-        .menu-overlay {
-            background-color: rgba(0, 0, 0, 0.85);
+            box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.7); /* Darkens the background */
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 100;
+            top: 0; left: 0; width: 100%; height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            z-index: 20;
         }
 
-        h1 { font-family: 'Press Start 2P', cursive; color: #f1c40f; font-size: 3.5em; line-height: 1.5; margin-bottom: 20px; text-shadow: 4px 4px 0 #e74c3c; }
-        
-        /* Start Screen Specifics */
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 4em;
+            color: #f1c40f;
+            text-shadow: 4px 4px 0 #e74c3c, 8px 8px 0 #000;
+            margin-bottom: 50px;
+            line-height: 1.2;
         }
-        .press-start-btn {
+
+        .start-btn {
             background: transparent;
-            color: #2ecc71;
+            color: #fff;
             border: none;
             font-family: 'Press Start 2P', cursive;
             font-size: 2em;
             cursor: pointer;
-            animation: pulse 1.5s infinite;
-            margin-top: 50px;
+            animation: blink 1.2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
-        /* Instruction Screen Specifics */
-        #instruction-screen { display: none; }
-        .instructions-box {
-            background-color: rgba(44, 62, 80, 0.9);
-            border: 4px solid #3498db;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 700px;
-            text-align: left;
-            font-size: 1.3em;
-            line-height: 1.6;
+        /* --- NEW: INSTRUCTION SCREEN --- */
+        #instruction-screen {
+            background-color: #1a252f;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .inst-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            color: #3498db;
             margin-bottom: 30px;
         }
-        .instructions-box span { color: #f1c40f; font-weight: bold; }
-        
-        .difficulty-buttons {
-            display: flex;
-            gap: 20px;
+
+        .inst-list {
+            text-align: left;
+            font-size: 1.8em;
+            line-height: 2;
+            margin-bottom: 40px;
+            color: #ecf0f1;
         }
-        .diff-btn {
+
+        .highlight { color: #f1c40f; font-weight: bold; }
+
+        .continue-btn {
+            background-color: #2ecc71;
             color: white;
+            font-family: 'Press Start 2P', cursive;
             font-size: 1.5em;
-            padding: 20px 30px;
+            padding: 20px 40px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
-            transition: 0.1s;
+            box-shadow: 0 6px 0 #27ae60;
         }
-        .diff-btn:active { transform: translateY(6px); box-shadow: none !important; }
-        .btn-easy { background-color: #2ecc71; box-shadow: 0 6px 0 #27ae60; }
-        .btn-hard { background-color: #e74c3c; box-shadow: 0 6px 0 #c0392b; }
+        .continue-btn:active { transform: translateY(6px); box-shadow: none; }
 
-        /* Game Screen Setup */
-        #game-screen { display: none; background-color: rgba(0,0,0,0.4); }
-
-        /* Top HUD: Health Bars */
+        /* --- EXISTING GAME SCREENS --- */
+        #game-screen { display: none; }
+        
         .hud {
             display: flex;
             justify-content: space-between;
@@ -109,34 +124,85 @@
             position: relative;
             z-index: 5;
         }
+
         .health-container { width: 40%; }
-        .name-tag { font-family: 'Press Start 2P', cursive; font-size: 1em; margin-bottom: 10px; text-transform: uppercase; text-shadow: 2px 2px 0px #000; }
-        .health-bar-bg { width: 100%; height: 30px; background-color: #333; border: 3px solid #fff; border-radius: 5px; position: relative; }
-        .health-bar-fill { height: 100%; width: 100%; background-color: #2ecc71; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .name-tag {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .health-bar-bg {
+            width: 100%;
+            height: 30px;
+            background-color: #333;
+            border: 3px solid #fff;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            width: 100%;
+            background-color: #2ecc71;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         #enemy-health-fill { background-color: #e74c3c; }
 
-        /* The Battle Arena */
         .arena {
             height: 400px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             padding: 0 50px 30px 50px;
+            background-image: url('stage.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             position: relative;
         }
-        .character { position: relative; z-index: 2; transition: transform 0.1s; }
+
+        .character {
+            position: relative;
+            z-index: 2;
+            transition: transform 0.1s;
+        }
+
         .char-img { height: 250px; width: auto; filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8)); }
         .boss-img { height: 320px; width: auto; filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8)); }
+
         .power-level {
-            background-color: #fff; color: #000; padding: 10px 20px; font-size: 1.5em; font-weight: bold;
-            border-radius: 10px; border: 4px solid #f1c40f; position: absolute; top: -60px; left: 50%;
-            transform: translateX(-50%); white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 10;
+            background-color: #fff;
+            color: #000;
+            padding: 10px 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            border: 4px solid #f1c40f;
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 10;
         }
         #enemy-power { border-color: #e74c3c; }
 
         /* Combat Animations */
-        @keyframes attackRight { 0% { transform: translateX(0) scale(1); } 50% { transform: translateX(200px) scale(1.1); } 100% { transform: translateX(0) scale(1); } }
-        @keyframes attackLeft { 0% { transform: translateX(0) scale(1); } 50% { transform: translateX(-200px) scale(1.1); } 100% { transform: translateX(0) scale(1); } }
+        @keyframes attackRight {
+            0% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(200px) scale(1.1); }
+            100% { transform: translateX(0) scale(1); }
+        }
+        @keyframes attackLeft {
+            0% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(-200px) scale(1.1); }
+            100% { transform: translateX(0) scale(1); }
+        }
         @keyframes damageShake {
             0% { transform: translate(1px, 1px) rotate(0deg); filter: brightness(1) sepia(0); }
             20% { transform: translate(-5px, 0px) rotate(3deg); filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -145,62 +211,115 @@
             80% { transform: translate(5px, 1px) rotate(-3deg); filter: brightness(1) sepia(0); }
             100% { transform: translate(1px, -2px) rotate(0deg); }
         }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.5); } }
-        .combat-text { position: absolute; font-family: 'Press Start 2P', cursive; font-size: 2.5em; color: #f1c40f; text-shadow: 4px 4px 0 #000; pointer-events: none; animation: floatUp 1.5s forwards; z-index: 10; }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
 
-        /* Controls / Combo Buttons */
-        .controls { background-color: rgba(34, 34, 34, 0.95); padding: 20px; border-top: 4px solid #444; }
-        .instruction { font-size: 1.5em; color: #3498db; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .button-grid { display: none; gap: 15px; max-width: 900px; margin: 0 auto; }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .combat-text {
+            position: absolute;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            color: #f1c40f;
+            text-shadow: 4px 4px 0 #000;
+            pointer-events: none;
+            animation: floatUp 1.5s forwards;
+            z-index: 10;
+        }
 
-        .action-btn { background-color: #2980b9; color: white; font-family: 'Roboto', sans-serif; font-size: 1.8em; font-weight: bold; padding: 15px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 0 #1c5980; transition: 0.1s; text-shadow: 2px 2px 0px rgba(0,0,0,0.3); }
+        .controls {
+            background-color: #222;
+            padding: 20px;
+            border-top: 4px solid #444;
+        }
+
+        .instruction {
+            font-size: 1.5em;
+            color: #3498db;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .action-btn {
+            background-color: #2980b9;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            font-size: 2em;
+            font-weight: bold;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1c5980;
+            transition: 0.1s;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+        }
         .action-btn:active { transform: translateY(6px); box-shadow: none; }
         .action-btn.multiply { background-color: #27ae60; box-shadow: 0 6px 0 #1e8449; }
         .action-btn.divide { background-color: #e67e22; box-shadow: 0 6px 0 #d35400; }
 
         /* End Screen */
-        #end-screen { display: none; z-index: 100; }
-        #btn-restart { font-size: 1.5em; padding: 20px 40px; margin-top: 30px; }
+        #end-screen { display: none; padding: 150px 20px; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #111; z-index: 15; box-sizing: border-box; }
+        h1 { font-family: 'Press Start 2P', cursive; color: #f1c40f; font-size: 4em; line-height: 1.5;}
+        
+        #btn-restart {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 1.5em;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-family: 'Press Start 2P', cursive;
+        }
     </style>
 </head>
 <body>
 
     <div id="game-wrapper">
         
-        <!-- START SCREEN -->
-        <div id="start-screen" class="menu-overlay">
-            <h1>THE DIGIT DOJO</h1>
-            <button class="press-start-btn" onclick="showInstructions()">PRESS START</button>
+        <!-- NEW: Start Screen -->
+        <div id="start-screen">
+            <div class="game-title">THE<br>DIGIT DOJO</div>
+            <button class="start-btn" onclick="showInstructions()">PRESS START</button>
         </div>
 
-        <!-- INSTRUCTION SCREEN -->
-        <div id="instruction-screen" class="menu-overlay">
-            <h1>HOW TO PLAY</h1>
-            <div class="instructions-box">
-                <p>🥋 You are facing the mighty Sensei Zero!</p>
-                <p>⚡ Look at your <span>Power Level</span> on the left.</p>
-                <p>🎯 Look at Sensei Zero's <span>Target Power Level</span> on the right.</p>
-                <p>👊 Choose the correct multiplier or divider to match his power exactly. A correct strike damages him, but a wrong combo will hurt you!</p>
+        <!-- NEW: Instruction Screen -->
+        <div id="instruction-screen">
+            <div class="inst-title">HOW TO PLAY</div>
+            <div class="inst-list">
+                1. Look at your <span class="highlight">Power Level</span>.<br><br>
+                2. Look at the Monster's <span class="highlight">Target Power</span>.<br><br>
+                3. Choose the correct attack (<span class="highlight">×</span> or <span class="highlight">÷</span>) to match their number!<br><br>
+                4. Defeat the monster before you lose all your health!
             </div>
-            <div class="difficulty-buttons">
-                <button class="diff-btn btn-easy" onclick="startGame('easy')">EASY MODE</button>
-                <button class="diff-btn btn-hard" onclick="startGame('hard')">HARD MODE</button>
-            </div>
+            <button class="continue-btn" onclick="startGame()">FIGHT!</button>
         </div>
 
-        <!-- GAME INTERFACE -->
+        <!-- Game Interface -->
         <div id="game-screen">
             <div class="hud">
                 <div class="health-container">
                     <div class="name-tag" style="color: #2ecc71; text-align: left;">Player</div>
-                    <div class="health-bar-bg"><div class="health-bar-fill" id="player-health-fill"></div></div>
+                    <div class="health-bar-bg">
+                        <div class="health-bar-fill" id="player-health-fill"></div>
+                    </div>
                 </div>
                 <div class="health-container">
                     <div class="name-tag" style="color: #e74c3c; text-align: right;">Sensei Zero</div>
-                    <div class="health-bar-bg"><div class="health-bar-fill" id="enemy-health-fill"></div></div>
+                    <div class="health-bar-bg">
+                        <div class="health-bar-fill" id="enemy-health-fill"></div>
+                    </div>
                 </div>
             </div>
 
@@ -217,64 +336,38 @@
 
             <div class="controls">
                 <div class="instruction">Select the correct combo strike!</div>
-                
-                <!-- EASY MODE CONTROLS -->
-                <div id="controls-easy" class="button-grid grid-3">
-                    <button class="action-btn multiply" onclick="checkAttack('x10')">× 10</button>
-                    <button class="action-btn multiply" onclick="checkAttack('x100')">× 100</button>
-                    <button class="action-btn multiply" onclick="checkAttack('x1000')">× 1,000</button>
-                    <button class="action-btn divide" onclick="checkAttack('d10')">÷ 10</button>
-                    <button class="action-btn divide" onclick="checkAttack('d100')">÷ 100</button>
-                    <button class="action-btn divide" onclick="checkAttack('d1000')">÷ 1,000</button>
-                </div>
-
-                <!-- HARD MODE CONTROLS -->
-                <div id="controls-hard" class="button-grid grid-4">
-                    <button class="action-btn multiply" onclick="checkAttack('x1')">× 10⁰</button>
-                    <button class="action-btn multiply" onclick="checkAttack('x10')">× 10¹</button>
-                    <button class="action-btn multiply" onclick="checkAttack('x100')">× 10²</button>
-                    <button class="action-btn multiply" onclick="checkAttack('x1000')">× 10³</button>
-                    <button class="action-btn divide" onclick="checkAttack('d1')">÷ 10⁰</button>
-                    <button class="action-btn divide" onclick="checkAttack('d10')">÷ 10¹</button>
-                    <button class="action-btn divide" onclick="checkAttack('d100')">÷ 10²</button>
-                    <button class="action-btn divide" onclick="checkAttack('d1000')">÷ 10³</button>
+                <div class="button-grid">
+                    <button class="action-btn multiply" onclick="checkAttack(10)">× 10</button>
+                    <button class="action-btn multiply" onclick="checkAttack(100)">× 100</button>
+                    <button class="action-btn multiply" onclick="checkAttack(1000)">× 1,000</button>
+                    <button class="action-btn divide" onclick="checkAttack(0.1)">÷ 10</button>
+                    <button class="action-btn divide" onclick="checkAttack(0.01)">÷ 100</button>
+                    <button class="action-btn divide" onclick="checkAttack(0.001)">÷ 1,000</button>
                 </div>
             </div>
         </div>
 
-        <!-- END SCREEN -->
-        <div id="end-screen" class="menu-overlay">
+        <!-- End Screen -->
+        <div id="end-screen">
             <h1 id="end-title">K.O!</h1>
-            <p style="font-size: 1.5em; margin-bottom: 40px; text-shadow: 2px 2px 0 #000;" id="end-message">You defeated the monster!</p>
-            <button class="diff-btn btn-easy" id="btn-restart" onclick="resetToStart()">PLAY AGAIN</button>
+            <p style="font-size: 2em; margin-bottom: 40px;" id="end-message">You defeated the monster!</p>
+            <button id="btn-restart" onclick="restartGame()">PLAY AGAIN</button>
         </div>
 
     </div>
 
     <script>
-        const easyBattles = [
-            { start: 5432719, target: 54327190, action: 'x10' },
-            { start: 327500, target: 3275, action: 'd100' },
-            { start: 948374, target: 94837400, action: 'x100' },
-            { start: 7657400, target: 765740, action: 'd10' },
-            { start: 4000000, target: 40000000, action: 'x10' },
-            { start: 6000000, target: 60000, action: 'd100' },
-            { start: 8000, target: 8000000, action: 'x1000' },
-            { start: 2000000, target: 2000, action: 'd1000' }
+        const battles = [
+            { start: 5432719, target: 54327190, action: 10 },
+            { start: 327500, target: 3275, action: 0.01 },
+            { start: 948374, target: 94837400, action: 100 },
+            { start: 7657400, target: 765740, action: 0.1 },
+            { start: 4000000, target: 40000000, action: 10 },
+            { start: 6000000, target: 60000, action: 0.01 },
+            { start: 8000, target: 8000000, action: 1000 },
+            { start: 2000000, target: 2000, action: 0.001 }
         ];
 
-        const hardBattles = [
-            { start: 8500, target: 8500, action: '1' },         // Trick: x10^0 or /10^0
-            { start: 420, target: 4200, action: 'x10' },        // x10^1
-            { start: 9000000, target: 90000, action: 'd100' },  // /10^2
-            { start: 73, target: 73000, action: 'x1000' },      // x10^3
-            { start: 5600, target: 560, action: 'd10' },        // /10^1
-            { start: 21000, target: 21000, action: '1' },       // Trick: x10^0 or /10^0
-            { start: 10, target: 1000, action: 'x100' },        // x10^2
-            { start: 800000, target: 800, action: 'd1000' }     // /10^3
-        ];
-
-        let activeBattles = [];
         let currentRound = 0;
         let playerHealth = 100;
         let enemyHealth = 100;
@@ -284,36 +377,16 @@
         const enemyChar = document.getElementById('enemy-char');
         const arenaBox = document.getElementById('arena-box');
 
+        // --- NEW: Screen Flow Functions --- //
         function showInstructions() {
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('instruction-screen').style.display = 'flex';
         }
 
-        function startGame(difficulty) {
+        function startGame() {
             document.getElementById('instruction-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
-            
-            // Set difficulty
-            if (difficulty === 'easy') {
-                activeBattles = easyBattles;
-                document.getElementById('controls-easy').style.display = 'grid';
-                document.getElementById('controls-hard').style.display = 'none';
-            } else {
-                activeBattles = hardBattles;
-                document.getElementById('controls-easy').style.display = 'none';
-                document.getElementById('controls-hard').style.display = 'grid';
-            }
-
-            currentRound = 0;
-            playerHealth = 100;
-            enemyHealth = 100;
-            updateHealthBars();
             loadRound();
-        }
-
-        function resetToStart() {
-            document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('start-screen').style.display = 'flex';
         }
 
         function formatNumber(num) {
@@ -321,7 +394,7 @@
         }
 
         function loadRound() {
-            let battle = activeBattles[currentRound];
+            let battle = battles[currentRound];
             document.getElementById('player-power').innerText = formatNumber(battle.start);
             document.getElementById('enemy-power').innerText = formatNumber(battle.target);
             isAnimating = false;
@@ -351,28 +424,20 @@
             document.getElementById('enemy-health-fill').style.width = enemyHealth + '%';
         }
 
-        function checkAttack(combo) {
+        function checkAttack(multiplier) {
             if (isAnimating) return;
             isAnimating = true;
 
-            let battle = activeBattles[currentRound];
-            let isCorrect = false;
-
-            // Check if the combo matches, including the 10^0 trick
-            if (combo === battle.action) {
-                isCorrect = true;
-            } else if (battle.action === '1' && (combo === 'x1' || combo === 'd1')) {
-                isCorrect = true;
-            }
+            let battle = battles[currentRound];
             
-            if (isCorrect) {
+            if (multiplier === battle.action) {
                 playerChar.style.animation = "attackRight 0.5s ease";
                 
                 setTimeout(() => {
                     enemyChar.style.animation = "damageShake 0.5s ease";
                     spawnCombatText("CRITICAL HIT!", false);
                     
-                    enemyHealth -= (100 / activeBattles.length);
+                    enemyHealth -= (100 / battles.length);
                     if(enemyHealth < 0) enemyHealth = 0;
                     updateHealthBars();
                 }, 250);
@@ -396,9 +461,9 @@
                 
                 if (playerHealth <= 0) {
                     endGame(false);
-                } else if (isCorrect) {
+                } else if (multiplier === battle.action) {
                     currentRound++;
-                    if (currentRound < activeBattles.length) {
+                    if (currentRound < battles.length) {
                         loadRound();
                     } else {
                         endGame(true);
@@ -412,6 +477,9 @@
         function endGame(playerWon) {
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
+            document.getElementById('end-screen').style.flexDirection = 'column';
+            document.getElementById('end-screen').style.justifyContent = 'center';
+            document.getElementById('end-screen').style.alignItems = 'center';
             
             if (playerWon) {
                 document.getElementById('end-title').innerText = "VICTORY!";
@@ -422,6 +490,17 @@
                 document.getElementById('end-title').style.color = "#e74c3c";
                 document.getElementById('end-message').innerText = "The monster defeated you. Train harder!";
             }
+        }
+
+        function restartGame() {
+            currentRound = 0;
+            playerHealth = 100;
+            enemyHealth = 100;
+            updateHealthBars();
+            
+            document.getElementById('end-screen').style.display = 'none';
+            // Send them back to the start screen
+            document.getElementById('start-screen').style.display = 'flex';
         }
     </script>
 </body>
