@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Football Playmaker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        #game-wrapper {
+            background-color: #27ae60;
+            max-width: 1000px;
+            min-height: 800px; 
+            margin: 0 auto;
+            border-radius: 15px;
+            border: 6px solid #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            background-image: url('football_pitch.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Menus */
+        .menu-overlay {
+            background-color: rgba(0, 0, 0, 0.85);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 { font-family: 'Press Start 2P', cursive; color: #f1c40f; font-size: 2.8em; line-height: 1.5; margin-bottom: 20px; text-shadow: 4px 4px 0 #3498db; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .press-start-btn { background: transparent; color: #2ecc71; border: none; font-family: 'Press Start 2P', cursive; font-size: 2em; cursor: pointer; animation: pulse 1.5s infinite; margin-top: 50px; }
+
+        /* Instructions & UI */
+        #instruction-screen { display: none; }
+        .instructions-box { background-color: rgba(44, 62, 80, 0.95); border: 4px solid #f1c40f; border-radius: 10px; padding: 25px; max-width: 800px; text-align: left; font-size: 1.2em; line-height: 1.6; margin-bottom: 30px; }
+        .instructions-box span { color: #f1c40f; font-weight: bold; }
+        
+        .difficulty-buttons { display: flex; gap: 20px; }
+        .diff-btn { color: white; font-size: 1.2em; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Press Start 2P', cursive; transition: 0.1s; z-index: 10;}
+        .diff-btn:active { transform: translateY(6px); box-shadow: none !important; }
+        .btn-easy { background-color: #3498db; box-shadow: 0 6px 0 #2980b9; }
+        .btn-hard { background-color: #e67e22; box-shadow: 0 6px 0 #d35400; }
+
+        /* Game Screen Setup */
+        #game-screen { display: none; flex-grow: 1; flex-direction: column; background-color: rgba(0, 0, 0, 0.3); position: relative; }
+
+        /* HUD & Central Math Board */
+        .hud { display: flex; justify-content: flex-start; padding: 15px 30px; background-color: rgba(0, 0, 0, 0.9); border-bottom: 4px solid #fff; z-index: 5; }
+        .scoreboard { font-family: 'Press Start 2P', cursive; font-size: 1.5em; color: #f1c40f; }
+        
+        #math-problem-container {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 5px solid #3498db;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            z-index: 4;
+        }
+
+        .math-span { display: inline-block; width: 28px; text-align: center; }
+
+        /* The Arena */
+        .arena { flex-grow: 1; position: relative; overflow: hidden; }
+        
+        .character { position: absolute; bottom: 30px; transition: all 0.5s ease; z-index: 2; }
+        #striker { left: 50px; height: 200px; filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6)); }
+        #goalie { right: 50px; height: 200px; filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6)); }
+        
+        #ball { position: absolute; bottom: 30px; left: 160px; height: 60px; z-index: 3; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); filter: drop-shadow(0 10px 5px rgba(0,0,0,0.5)); }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+        .shake-error { animation: shake 0.4s; }
+
+        /* Controls */
+        .controls { background-color: rgba(20, 20, 20, 0.98); padding: 25px; border-top: 4px solid #fff; display: flex; flex-direction: column; align-items: center; z-index: 5; }
+        .prompt-text { font-size: 1.5em; margin-bottom: 15px; font-weight: bold; text-shadow: 2px 2px 0 #000; }
+        
+        .input-group { display: flex; gap: 15px; align-items: center; }
+        #player-input { font-size: 2em; padding: 10px; width: 150px; text-align: center; border-radius: 8px; border: 3px solid #3498db; font-weight: bold; }
+        
+        .action-btn { background-color: #3498db; color: white; font-family: 'Press Start 2P', cursive; font-size: 1.2em; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 0 #2980b9; transition: 0.1s; }
+        .action-btn:active { transform: translateY(6px); box-shadow: none; }
+        .hint-btn { background-color: #f39c12; box-shadow: 0 6px 0 #d35400; padding: 15px 20px; }
+
+        /* End Screen */
+        #end-screen { display: none; }
+        #celebration-anim { height: 230px; margin-bottom: 20px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); transition: transform 0.1s linear; }
+        .victory-text { color: #2ecc71; font-size: 3em; font-family: 'Press Start 2P', cursive; margin-bottom: 15px; text-shadow: 3px 3px 0 #000; }
+        .final-score { color: #f1c40f; font-size: 2em; margin-bottom: 15px; font-weight: bold; text-shadow: 2px 2px 0 #000;}
+        .encouragement { color: #ecf0f1; font-size: 1.3em; max-width: 700px; line-height: 1.5; margin-bottom: 20px; }
+        .signature { color: #3498db; font-size: 1.1em; font-family: 'Press Start 2P', cursive; margin-bottom: 30px; text-shadow: 2px 2px 0 #000;}
+        
+        audio { display: none; }
+    </style>
+</head>
+<body>
+
+    <audio id="audio-cheer" src="stadium_cheer.mp3"></audio>
+    <audio id="audio-victory" src="victory_anthem.mp3"></audio>
+
+    <div id="game-wrapper">
+        
+        <!-- START SCREEN -->
+        <div id="start-screen" class="menu-overlay">
+            <h1>THE FOOTBALL PLAYMAKER</h1>
+            <button class="press-start-btn" onclick="showInstructions()">PRESS START</button>
+        </div>
+
+        <!-- INSTRUCTION SCREEN -->
+        <div id="instruction-screen" class="menu-overlay">
+            <h1>HOW TO PLAY</h1>
+            <div class="instructions-box">
+                <p>⚽ Lead your striker down the football pitch by solving long division!</p>
+                <p>📝 You must calculate <span>every single step</span> of the algorithm.</p>
+                <p>💡 Use the <span>HINT</span> button if you get stuck on a specific calculation.</p>
+                <p>🔄 Complete the cycle: <span>Divide ➔ Multiply ➔ Subtract ➔ Bring Down</span> to advance the ball.</p>
+            </div>
+            <div class="difficulty-buttons">
+                <button class="diff-btn btn-easy" onclick="startGame('easy')">EASY MODE</button>
+                <button class="diff-btn btn-hard" onclick="startGame('hard')">HARD MODE</button>
+            </div>
+        </div>
+
+        <!-- GAME INTERFACE -->
+        <div id="game-screen">
+            <div class="hud">
+                <div class="scoreboard" id="score-display">SCORE: 0 - 0</div>
+            </div>
+
+            <div id="math-problem-container"></div>
+
+            <div class="arena" id="arena-box">
+                <img src="striker.png" alt="Striker" class="character" id="striker">
+                <img src="football.png" alt="Ball" id="ball">
+                <img src="goalie.png" alt="Goalie" class="character" id="goalie">
+            </div>
+
+            <div class="controls">
+                <div class="prompt-text" id="step-prompt">Step prompt goes here...</div>
+                <div class="input-group">
+                    <input type="number" id="player-input" placeholder="?">
+                    <button class="action-btn hint-btn" onclick="showHint()" type="button">HINT</button>
+                    <button class="action-btn" onclick="checkAnswer()" type="button">KICK!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="menu-overlay">
+            <img id="celebration-anim" src="" alt="Celebration Sequence">
+            <div class="victory-text">VICTORY!</div>
+            <div class="final-score">FINAL SCORE: 3 - 0</div>
+            <div class="encouragement">Amazing teamwork and incredible math skills! You mastered the steps of long division and secured the win for the team. Keep up the hard work!</div>
+            <div class="signature">Created by Mr. Mazen</div>
+            <button class="diff-btn btn-easy" onclick="resetToStart()">PLAY AGAIN</button>
+        </div>
+
+    </div>
+
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let currentStep = 1;
+        let score = 0;
+        let activeQuestion = null;
+        let loopAnim; 
+        let cheerTimeout = null;
+
+        const colors = {
+            divide: "#00d2d3",   // Cyan
+            multiply: "#ff6b6b", // Red
+            subtract: "#ff9f43", // Orange
+            bringDown: "#1dd1a1",// Green
+            remainder: "#feca57",// Yellow
+            default: "#ffffff"   
+        };
+
+        function buildStr(valStr, alignEndIdx, totalLen) {
+            let arr = Array(totalLen).fill(' ');
+            let startIdx = alignEndIdx - valStr.length + 1;
+            for(let i=0; i<valStr.length; i++){
+                arr[startIdx + i] = valStr[i];
+            }
+            return arr.join('');
+        }
+
+        function makeSpans(text, color="white") {
+            let html = "";
+            for(let char of text) {
+                html += `<span class="math-span" style="color: ${color};">${char === ' ' ? '&nbsp;' : char}</span>`;
+            }
+            return html;
+        }
+
+        function generateQuestions(difficulty) {
+            let generated = [];
+            for(let i = 0; i < 3; i++) {
+                let div = difficulty === 'easy' ? Math.floor(Math.random() * 8) + 2 : Math.floor(Math.random() * 15) + 11;
+                let q1 = Math.floor(Math.random() * 8) + 1; 
+                let s1 = Math.floor(Math.random() * div); 
+                let AB = (div * q1) + s1; 
+                let C = Math.floor(Math.random() * 10); 
+                let NewNum = (s1 * 10) + C; 
+                let q2 = Math.floor(NewNum / div); 
+                let rem = NewNum % div; 
+                let dividend = (AB * 10) + C;
+                
+                generated.push({
+                    div: div, dividend: dividend, AB: AB, C: C, 
+                    q1: q1, s1: s1, NewNum: NewNum, q2: q2, rem: rem
+                });
+            }
+            return generated;
+        }
+
+        function showInstructions() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('instruction-screen').style.display = 'flex';
+        }
+
+        function startGame(difficulty) {
+            document.getElementById('instruction-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            // Preload victory images (Pose -> Run -> Jump)
+            new Image().src = 'victory_pose.png';
+            new Image().src = 'victory_run.png';
+            new Image().src = 'victory_jump.png';
+            
+            let vAudio = document.getElementById('audio-victory');
+            if(vAudio) { vAudio.pause(); vAudio.currentTime = 0; }
+
+            stopCheerAudio();
+
+            questions = generateQuestions(difficulty);
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScoreboard();
+            loadQuestion();
+        }
+
+        function updateScoreboard() {
+            document.getElementById('score-display').innerText = `SCORE: ${score} - 0`;
+        }
+
+        function resetPositions() {
+            document.getElementById('striker').style.left = '50px';
+            document.getElementById('ball').style.left = '160px';
+            document.getElementById('ball').style.bottom = '30px';
+            document.getElementById('ball').style.transform = 'rotate(0deg)';
+            document.getElementById('goalie').style.transform = 'translateX(0)';
+        }
+
+        function stopCheerAudio() {
+            if (cheerTimeout) {
+                clearTimeout(cheerTimeout);
+                cheerTimeout = null;
+            }
+            let cheer = document.getElementById('audio-cheer');
+            if (cheer) {
+                cheer.pause();
+                cheer.currentTime = 0;
+            }
+        }
+
+        function loadQuestion() {
+            activeQuestion = questions[currentQuestionIndex];
+            currentStep = 1;
+            resetPositions();
+            
+            let len = activeQuestion.dividend.toString().length; 
+            let AB_len = activeQuestion.AB.toString().length;
+            activeQuestion.totalLen = len + 1; 
+            
+            let divdStr = " " + activeQuestion.dividend.toString(); 
+            
+            activeQuestion.q1Str = buildStr(activeQuestion.q1.toString(), AB_len, activeQuestion.totalLen); 
+            activeQuestion.m1Str = buildStr("-" + (activeQuestion.div * activeQuestion.q1).toString(), AB_len, activeQuestion.totalLen); 
+            activeQuestion.s1Str = buildStr(activeQuestion.s1.toString(), AB_len, activeQuestion.totalLen); 
+            activeQuestion.s1cStr = buildStr(activeQuestion.NewNum.toString(), AB_len + 1, activeQuestion.totalLen);
+            activeQuestion.q2Str = buildStr(activeQuestion.q1.toString() + activeQuestion.q2.toString(), AB_len + 1, activeQuestion.totalLen);
+            activeQuestion.m2Str = buildStr("-" + (activeQuestion.div * activeQuestion.q2).toString(), AB_len + 1, activeQuestion.totalLen);
+            activeQuestion.remStr = buildStr(activeQuestion.rem.toString(), AB_len + 1, activeQuestion.totalLen);
+
+            let emptyRow = Array(activeQuestion.totalLen).fill(' ').join('');
+
+            let boardHtml = `
+            <div style="display: flex; align-items: flex-start; justify-content: center; width: max-content;">
+                <div style="padding-right: 15px; border-right: 4px solid white; margin-top: 50px; font-family: 'Press Start 2P', monospace; font-size: 2em; line-height: 1.5; color: white;">
+                    ${activeQuestion.div}
+                </div>
+                <div style="display: flex; flex-direction: column; text-align: left; font-family: 'Press Start 2P', monospace; font-size: 2.2em; line-height: 1.5;">
+                    <div id="row-q" style="border-bottom: 4px solid white;">${makeSpans(emptyRow)}</div>
+                    <div>${makeSpans(divdStr)}</div>
+                    <div id="row-m1" style="border-bottom: 3px solid white; display: none;"></div>
+                    <div id="row-s1" style="display: none;"></div>
+                    <div id="row-m2" style="border-bottom: 3px solid white; display: none;"></div>
+                    <div id="row-rem" style="display: none;"></div>
+                </div>
+            </div>`;
+
+            document.getElementById('math-problem-container').innerHTML = boardHtml;
+            document.getElementById('player-input').value = "";
+            loadStepPrompt();
+        }
+
+        function loadStepPrompt() {
+            let promptEl = document.getElementById('step-prompt');
+            let inputField = document.getElementById('player-input');
+            inputField.value = "";
+            inputField.focus();
+
+            let promptText = "";
+            let hintText = "";
+            let expected = 0;
+            let color = "#ffffff";
+
+            switch(currentStep) {
+                case 1: 
+                    promptText = `Step 1 (Divide): How many times does the divisor go into the first part of the dividend?`; 
+                    hintText = `Hint: How many times does ${activeQuestion.div} go into ${activeQuestion.AB}?`;
+                    expected = activeQuestion.q1;
+                    color = colors.divide;
+                    break;
+                case 2: 
+                    promptText = `Step 2 (Multiply): Multiply the divisor by your quotient digit.`; 
+                    hintText = `Hint: ${activeQuestion.div} × ${activeQuestion.q1} = ?`;
+                    expected = activeQuestion.div * activeQuestion.q1;
+                    color = colors.multiply;
+                    break;
+                case 3: 
+                    promptText = `Step 3 (Subtract): Subtract the product from the dividend above.`; 
+                    hintText = `Hint: ${activeQuestion.AB} - ${activeQuestion.div * activeQuestion.q1} = ?`;
+                    expected = activeQuestion.s1;
+                    color = colors.subtract;
+                    break;
+                case 4: 
+                    promptText = `Step 4 (Bring Down): Bring down the next digit to form your new number.`; 
+                    hintText = `Hint: Bring down ${activeQuestion.C} next to ${activeQuestion.s1}. Type ${activeQuestion.NewNum}.`;
+                    expected = activeQuestion.NewNum;
+                    color = colors.bringDown;
+                    break;
+                case 5: 
+                    promptText = `Step 5 (Divide): How many times does the divisor go into this new number?`; 
+                    hintText = `Hint: How many times does ${activeQuestion.div} go into ${activeQuestion.NewNum}?`;
+                    expected = activeQuestion.q2;
+                    color = colors.divide;
+                    break;
+                case 6:
+                    promptText = `Step 6 (Multiply): Multiply the divisor by your new quotient digit.`;
+                    hintText = `Hint: ${activeQuestion.div} × ${activeQuestion.q2} = ?`;
+                    expected = activeQuestion.div * activeQuestion.q2;
+                    color = colors.multiply;
+                    break;
+                case 7:
+                    promptText = `Step 7 (Final Remainder): Subtract to find the final remainder.`;
+                    hintText = `Hint: ${activeQuestion.NewNum} - ${activeQuestion.div * activeQuestion.q2} = ?`;
+                    expected = activeQuestion.rem;
+                    color = colors.remainder;
+                    break;
+            }
+            
+            activeQuestion.expected = expected;
+            activeQuestion.hint = hintText;
+            promptEl.innerText = promptText;
+            promptEl.style.color = color;
+        }
+        
+        function showHint() {
+            document.getElementById('step-prompt').innerText = activeQuestion.hint;
+        }
+
+        function checkAnswer() {
+            let userInput = parseInt(document.getElementById('player-input').value);
+            
+            if (userInput === activeQuestion.expected) {
+                advancePlay();
+            } else {
+                let wrapper = document.getElementById('game-wrapper');
+                wrapper.classList.add('shake-error');
+                
+                let promptEl = document.getElementById('step-prompt');
+                let oldText = promptEl.innerText;
+                let oldColor = promptEl.style.color;
+                
+                promptEl.innerText = "❌ Incorrect! Recalculate!";
+                promptEl.style.color = "#e74c3c";
+                
+                setTimeout(() => { 
+                    wrapper.classList.remove('shake-error'); 
+                    promptEl.innerText = oldText;
+                    promptEl.style.color = oldColor;
+                }, 1000);
+            }
+        }
+
+        document.getElementById("player-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") { event.preventDefault(); checkAnswer(); }
+        });
+
+        function advancePlay() {
+            // Update the Math Board step-by-step
+            if (currentStep === 1) {
+                document.getElementById('row-q').innerHTML = makeSpans(activeQuestion.q1Str, colors.divide);
+            } else if (currentStep === 2) {
+                document.getElementById('row-m1').innerHTML = makeSpans(activeQuestion.m1Str, colors.multiply);
+                document.getElementById('row-m1').style.display = 'block';
+            } else if (currentStep === 3) {
+                document.getElementById('row-s1').innerHTML = makeSpans(activeQuestion.s1Str, colors.subtract);
+                document.getElementById('row-s1').style.display = 'block';
+            } else if (currentStep === 4) {
+                document.getElementById('row-s1').innerHTML = makeSpans(activeQuestion.s1cStr, colors.bringDown);
+            } else if (currentStep === 5) {
+                document.getElementById('row-q').innerHTML = makeSpans(activeQuestion.q2Str, colors.divide);
+            } else if (currentStep === 6) {
+                document.getElementById('row-m2').innerHTML = makeSpans(activeQuestion.m2Str, colors.multiply);
+                document.getElementById('row-m2').style.display = 'block';
+            } else if (currentStep === 7) {
+                document.getElementById('row-rem').innerHTML = makeSpans(activeQuestion.remStr, colors.remainder);
+                document.getElementById('row-rem').style.display = 'block';
+            }
+
+            let striker = document.getElementById('striker');
+            let ball = document.getElementById('ball');
+            let goalie = document.getElementById('goalie');
+
+            if (currentStep < 7) {
+                // Adjust movement speed to fit 7 steps
+                let moveAmount = currentStep * 75;
+                striker.style.left = (50 + moveAmount) + 'px';
+                ball.style.left = (160 + moveAmount) + 'px';
+                ball.style.transform = `rotate(${moveAmount}deg)`;
+                goalie.style.transform = (currentStep % 2 === 0) ? 'translateX(-20px)' : 'translateX(20px)';
+                
+                currentStep++;
+                loadStepPrompt();
+            } else {
+                let promptEl = document.getElementById('step-prompt');
+                promptEl.innerText = "⚽ GOOOAAALLLL! ⚽";
+                promptEl.style.color = "#ffffff";
+                
+                ball.style.left = '900px'; 
+                ball.style.bottom = '150px'; 
+                ball.style.transform = 'rotate(1000deg)';
+                goalie.style.transform = 'translateX(-100px)'; 
+                
+                let cheer = document.getElementById('audio-cheer');
+                if(cheer) {
+                    stopCheerAudio();
+                    cheer.play().catch(e=>{});
+                    cheerTimeout = setTimeout(() => {
+                        cheer.pause();
+                        cheer.currentTime = 0;
+                        cheerTimeout = null;
+                    }, 5000); // 5 second goal limit
+                }
+
+                score++;
+                updateScoreboard();
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < 3) { 
+                        loadQuestion(); 
+                    } else { 
+                        endGame(); 
+                    }
+                }, 2500);
+            }
+        }
+
+        function endGame() {
+            stopCheerAudio();
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+            
+            let vAudio = document.getElementById('audio-victory');
+            if(vAudio) { vAudio.currentTime = 0; vAudio.play().catch(e=>{}); }
+
+            let anim = document.getElementById('celebration-anim');
+            
+            // New Sequence: Pose -> Run -> Jump
+            let frames = ['victory_pose.png', 'victory_run.png', 'victory_jump.png'];
+            let frameIdx = 0;
+            anim.src = frames[0];
+            anim.style.transform = "translateY(0px)";
+            
+            loopAnim = setInterval(() => {
+                frameIdx = (frameIdx + 1) % frames.length;
+                anim.src = frames[frameIdx];
+                
+                // Elevate when the frame is 'victory_jump.png' (index 2)
+                if (frameIdx === 2) {
+                    anim.style.transform = "translateY(-60px)";
+                } else {
+                    anim.style.transform = "translateY(0px)";
+                }
+            }, 450); 
+        }
+
+        function resetToStart() {
+            stopCheerAudio();
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+            clearInterval(loopAnim);
+            
+            document.getElementById('celebration-anim').style.transform = "translateY(0px)";
+            
+            let vAudio = document.getElementById('audio-victory');
+            if(vAudio) { vAudio.pause(); }
+        }
+    </script>
+</body>
+</html>
