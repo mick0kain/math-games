@@ -5,54 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Vault Cracker</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@700&display=swap');
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #2c3e50;
+            font-family: 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
             color: #ecf0f1;
             text-align: center;
             margin: 0;
             padding: 20px;
-            overflow-x: hidden; /* Keeps money animation inside the screen */
+            overflow-x: hidden; 
         }
+        
         #game-wrapper {
-            background-color: #34495e;
-            max-width: 900px;
+            background-color: #2c3e50;
+            max-width: 1000px;
             margin: 0 auto;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             border: 6px solid #7f8c8d;
             position: relative;
             z-index: 10;
+            overflow: hidden;
         }
+
+        /* Penalty Laser Grid */
+        #laser-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(231, 76, 60, 0.6) 40px, rgba(231, 76, 60, 0.6) 44px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(231, 76, 60, 0.6) 40px, rgba(231, 76, 60, 0.6) 44px);
+            z-index: 50;
+            display: none;
+            pointer-events: none;
+            box-shadow: inset 0 0 50px rgba(231, 76, 60, 0.8);
+        }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+        .shake-error { animation: shake 0.4s; }
+
         h1 {
+            font-family: 'Press Start 2P', cursive;
             color: #f1c40f;
-            font-size: 2.8em;
+            font-size: 2.2em;
             margin-bottom: 5px;
-            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #000;
         }
         .mission-text {
             font-size: 1.3em;
             color: #bdc3c7;
             margin-bottom: 20px;
+            font-weight: bold;
         }
         
+        /* HUD */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .level-tracker { color: #f39c12; font-size: 1em; }
+        .lives { color: #e74c3c; font-size: 1.2em; letter-spacing: 5px; }
+
         /* Start Menu Styles */
         #start-screen { display: block; }
         .diff-btn {
             color: white;
             border: none;
             padding: 20px 40px;
-            font-size: 1.8em;
-            font-weight: bold;
+            font-size: 1.2em;
+            font-family: 'Press Start 2P', cursive;
             border-radius: 10px;
             cursor: pointer;
             margin: 15px;
-            width: 250px;
+            width: 350px;
             box-shadow: 0 6px 0 rgba(0,0,0,0.3);
             transition: 0.1s;
         }
         .diff-btn:active { transform: translateY(6px); box-shadow: none; }
+        .diff-btn small { display: block; font-size: 0.5em; margin-top: 10px; font-family: 'Roboto', sans-serif;}
         #btn-easy { background-color: #2ecc71; box-shadow: 0 6px 0 #27ae60; }
         #btn-medium { background-color: #f39c12; box-shadow: 0 6px 0 #d35400; }
         #btn-hard { background-color: #e74c3c; box-shadow: 0 6px 0 #c0392b; }
@@ -63,10 +101,10 @@
             background-color: #1abc9c;
             color: #fff;
             padding: 20px;
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: bold;
             border-radius: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             border: 3px dashed #16a085;
         }
         
@@ -79,13 +117,14 @@
             flex-wrap: wrap;
         }
         .period-group {
-            background-color: #2c3e50;
-            border: 3px solid #95a5a6;
+            background-color: #1a252f;
+            border: 4px solid #95a5a6;
             border-radius: 10px;
-            padding: 15px;
+            padding: 20px 15px 15px 15px;
             display: flex;
             gap: 5px;
             position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
         .period-label {
             position: absolute;
@@ -94,14 +133,15 @@
             transform: translateX(-50%);
             background-color: #f39c12;
             color: white;
-            padding: 2px 10px;
+            padding: 5px 15px;
             border-radius: 5px;
-            font-size: 0.9em;
-            font-weight: bold;
+            font-size: 0.8em;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 0px #000;
         }
         .comma {
             font-size: 4em;
-            color: #ecf0f1;
+            color: #7f8c8d;
             align-self: flex-end;
             line-height: 0.5;
             padding-bottom: 15px;
@@ -115,38 +155,59 @@
             background-color: #7f8c8d;
             color: white;
             border: none;
-            width: 40px;
+            width: 45px;
             height: 40px;
             font-size: 1.5em;
             border-radius: 5px;
             cursor: pointer;
             transition: 0.2s;
+            box-shadow: 0 4px 0 #555;
         }
-        .arrow-btn:hover { background-color: #95a5a6; }
-        .arrow-btn:active { background-color: #bdc3c7; }
+        .arrow-btn:active { transform: translateY(4px); box-shadow: none; background-color: #bdc3c7; }
         
         .number-display {
             background-color: #ecf0f1;
             color: #2c3e50;
             font-size: 3em;
             font-weight: bold;
-            width: 50px;
-            height: 60px;
+            width: 55px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 10px 0;
+            margin: 15px 0;
             border-radius: 5px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+            font-family: 'Press Start 2P', cursive;
         }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .hint-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.2em;
+            font-family: 'Press Start 2P', cursive;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #d35400;
+            transition: 0.1s;
+        }
+        .hint-btn:active { transform: translateY(6px); box-shadow: none; }
 
         #action-btn {
             background-color: #e74c3c;
             color: white;
             border: none;
             padding: 15px 40px;
-            font-size: 2em;
-            font-weight: bold;
+            font-size: 1.2em;
+            font-family: 'Press Start 2P', cursive;
             border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 6px 0 #c0392b;
@@ -156,23 +217,23 @@
         #action-btn.next-level { background-color: #27ae60; box-shadow: 0 6px 0 #2ecc71; }
 
         #feedback {
-            font-size: 2em;
+            font-size: 1.5em;
             font-weight: bold;
             margin-top: 25px;
             min-height: 45px;
+            font-family: 'Roboto', sans-serif;
         }
-        .correct { color: #2ecc71; }
-        .incorrect { color: #e74c3c; }
+        .correct { color: #2ecc71; text-shadow: 1px 1px 0 #000; }
+        .incorrect { color: #e74c3c; text-shadow: 1px 1px 0 #000; }
+        .hint-text { color: #f1c40f; text-shadow: 1px 1px 0 #000; }
         
-        .level-tracker { font-size: 1.2em; color: #f39c12; margin-top: 10px; }
-
         #btn-restart {
             background-color: #3498db;
             color: white;
             border: none;
             padding: 15px 30px;
-            font-size: 1.5em;
-            font-weight: bold;
+            font-size: 1.2em;
+            font-family: 'Press Start 2P', cursive;
             border-radius: 10px;
             cursor: pointer;
             margin-top: 20px;
@@ -188,7 +249,7 @@
         .money-particle {
             position: fixed;
             font-size: 4em;
-            z-index: 5; /* Falls behind the game window */
+            z-index: 5;
             pointer-events: none;
             animation: fall linear forwards;
         }
@@ -196,22 +257,31 @@
 </head>
 <body>
 
+    <audio id="audio-click" src="click.mp3"></audio>
+    <audio id="audio-lock" src="lock.mp3"></audio>
+    <audio id="audio-alarm" src="alarm.mp3"></audio>
+    <audio id="audio-victory" src="heist_victory.mp3"></audio>
+
     <div id="game-wrapper">
-        <h1>🕵️‍♂️ The Vault Cracker 🕵️‍♂️</h1>
+        <div id="laser-overlay"></div>
+        <h1>THE VAULT CRACKER</h1>
         
         <!-- Start Screen -->
         <div id="start-screen">
-            <p class="mission-text">Select your security clearance level to begin cracking the safes!</p>
-            <button class="diff-btn" id="btn-easy" onclick="startGame('easy')">🟢 Easy<br><small>(Up to Thousands)</small></button>
+            <p class="mission-text">Select your security clearance to begin the heist!</p>
+            <button class="diff-btn" id="btn-easy" onclick="startGame('easy')">🟢 EASY<br><small>Up to Thousands</small></button>
             <br>
-            <button class="diff-btn" id="btn-medium" onclick="startGame('medium')">🟠 Medium<br><small>(Up to Millions)</small></button>
+            <button class="diff-btn" id="btn-medium" onclick="startGame('medium')">🟠 MEDIUM<br><small>Up to Millions</small></button>
             <br>
-            <button class="diff-btn" id="btn-hard" onclick="startGame('hard')">🔴 Hard<br><small>(Hundred Millions)</small></button>
+            <button class="diff-btn" id="btn-hard" onclick="startGame('hard')">🔴 HARD<br><small>Hundred Millions</small></button>
         </div>
 
         <!-- Game Screen -->
         <div id="game-screen">
-            <div class="mission-text">Spin the dials to match the number and crack the safe! (Leave a '0' if the place is empty).</div>
+            <div class="hud">
+                <div class="level-tracker">VAULT: <span id="level-display">1</span>/8</div>
+                <div class="lives" id="lives-display">🚨🚨🚨</div>
+            </div>
             
             <div id="target-display">Loading Mission...</div>
             
@@ -279,16 +349,18 @@
                 </div>
             </div>
 
-            <button id="action-btn" onclick="handleAction()">🔓 UNLOCK</button>
+            <div class="controls">
+                <button class="hint-btn" onclick="showHint()">HINT</button>
+                <button id="action-btn" onclick="handleAction()">UNLOCK</button>
+            </div>
             <div id="feedback"></div>
-            <div class="level-tracker">Vault: <span id="level-display">1</span> / 8</div>
         </div>
 
         <!-- End Screen -->
         <div id="end-screen">
-            <h2 class="correct" style="font-size: 3em;">🏆 ALL VAULTS CRACKED! 🏆</h2>
-            <p class="mission-text">You are a Place Value Master!</p>
-            <button id="btn-restart" onclick="showStartScreen()">🔄 Play Again</button>
+            <h2 id="end-title" class="correct" style="font-size: 2.5em; font-family: 'Press Start 2P', cursive;">ALL VAULTS CRACKED!</h2>
+            <p id="end-desc" class="mission-text">You are a Place Value Master!</p>
+            <button id="btn-restart" onclick="showStartScreen()">PLAY AGAIN</button>
         </div>
     </div>
 
@@ -296,47 +368,57 @@
         let currentCode = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         let activeMissions = [];
         let currentLevel = 0;
+        let lives = 3;
         let isLevelComplete = false;
 
         // --- DIFFICULTY LIBRARIES --- //
         const easyMissions = [
-            { text: "Word Form: Five hundred twenty", code: [0,0,0,0,0,0,5,2,0] },
-            { text: "Expanded Form: 4,000 + 300 + 9", code: [0,0,0,0,0,4,3,0,9] },
-            { text: "Word Form: Twelve thousand, four hundred", code: [0,0,0,0,1,2,4,0,0] },
-            { text: "Expanded Form: 80,000 + 5,000 + 10", code: [0,0,0,0,8,5,0,1,0] },
-            { text: "Word Form: Seven thousand, sixteen", code: [0,0,0,0,0,7,0,1,6] },
-            { text: "Expanded Form: 900 + 90 + 9", code: [0,0,0,0,0,0,9,9,9] },
-            { text: "Word Form: Fifty thousand, two", code: [0,0,0,0,5,0,0,0,2] },
-            { text: "Expanded Form: 6,000 + 800 + 40", code: [0,0,0,0,0,6,8,4,0] }
+            { text: "Word Form: Five hundred twenty", hint: "Hint: The hundreds digit is 5. Leave millions and thousands as 0.", code: [0,0,0,0,0,0,5,2,0] },
+            { text: "Expanded Form: 4,000 + 300 + 9", hint: "Hint: There are 4 thousands. Watch out for the tens place!", code: [0,0,0,0,0,4,3,0,9] },
+            { text: "Word Form: Twelve thousand, four hundred", hint: "Hint: 12 goes in the thousands period.", code: [0,0,0,0,1,2,4,0,0] },
+            { text: "Expanded Form: 80,000 + 5,000 + 10", hint: "Hint: Combine to make 85 in the thousands period.", code: [0,0,0,0,8,5,0,1,0] },
+            { text: "Word Form: Seven thousand, sixteen", hint: "Hint: Make sure there is a zero in the hundreds place.", code: [0,0,0,0,0,7,0,1,6] },
+            { text: "Expanded Form: 900 + 90 + 9", hint: "Hint: Just fill the ones period.", code: [0,0,0,0,0,0,9,9,9] },
+            { text: "Word Form: Fifty thousand, two", hint: "Hint: 50 in the thousands period. 2 in the ones period.", code: [0,0,0,0,5,0,0,0,2] },
+            { text: "Expanded Form: 6,000 + 800 + 40", hint: "Hint: The ones digit is 0.", code: [0,0,0,0,0,6,8,4,0] }
         ];
 
         const mediumMissions = [
-            { text: "Word Form: Four hundred thousand, fifty", code: [0,0,0,4,0,0,0,5,0] },
-            { text: "Expanded Form: 700,000 + 20,000 + 9,000", code: [0,0,0,7,2,9,0,0,0] },
-            { text: "Word Form: Two million, one hundred thousand", code: [0,0,2,1,0,0,0,0,0] },
-            { text: "Expanded Form: 5,000,000 + 80,000 + 300", code: [0,0,5,0,8,0,3,0,0] },
-            { text: "Word Form: Six hundred twelve thousand, nine", code: [0,0,0,6,1,2,0,0,9] },
-            { text: "Expanded Form: 1,000,000 + 400,000 + 6,000 + 70", code: [0,0,1,4,0,6,0,7,0] },
-            { text: "Word Form: Nine million, eleven", code: [0,0,9,0,0,0,0,1,1] },
-            { text: "Expanded Form: 300,000 + 50,000 + 4,000 + 2", code: [0,0,0,3,5,4,0,0,2] }
+            { text: "Word Form: Four hundred thousand, fifty", hint: "Hint: 400 goes in the thousands period.", code: [0,0,0,4,0,0,0,5,0] },
+            { text: "Expanded Form: 700,000 + 20,000 + 9,000", hint: "Hint: 729 goes in the thousands period. The rest are 0.", code: [0,0,0,7,2,9,0,0,0] },
+            { text: "Word Form: Two million, one hundred thousand", hint: "Hint: 2 is your only millions digit.", code: [0,0,2,1,0,0,0,0,0] },
+            { text: "Expanded Form: 5,000,000 + 80,000 + 300", hint: "Hint: Watch out for zeros in the hundred-thousands place.", code: [0,0,5,0,8,0,3,0,0] },
+            { text: "Word Form: Six hundred twelve thousand, nine", hint: "Hint: 612 goes in the thousands period.", code: [0,0,0,6,1,2,0,0,9] },
+            { text: "Expanded Form: 1,000,000 + 400,000 + 6,000 + 70", hint: "Hint: What happened to the ten-thousands?", code: [0,0,1,4,0,6,0,7,0] },
+            { text: "Word Form: Nine million, eleven", hint: "Hint: Lots of zeros between the 9 and the 11!", code: [0,0,9,0,0,0,0,1,1] },
+            { text: "Expanded Form: 300,000 + 50,000 + 4,000 + 2", hint: "Hint: 354 goes in the thousands period.", code: [0,0,0,3,5,4,0,0,2] }
         ];
 
         const hardMissions = [
-            { text: "Word Form: Fifty-two million, four hundred thousand", code: [0,5,2,4,0,0,0,0,0] },
-            { text: "Expanded Form: 100,000,000 + 20,000,000 + 5,000", code: [1,2,0,0,0,5,0,0,0] },
-            { text: "Word Form: Three hundred million, six thousand, ten", code: [3,0,0,0,0,6,0,1,0] },
-            { text: "Expanded Form: 80,000,000 + 4,000,000 + 900,000 + 7", code: [0,8,4,9,0,0,0,0,7] },
-            { text: "Word Form: Nine hundred ninety million, nine", code: [9,9,0,0,0,0,0,0,9] },
-            { text: "Expanded Form: 400,000,000 + 60,000 + 300 + 80", code: [4,0,0,0,6,0,3,8,0] },
-            { text: "Word Form: Seventy million, two hundred thousand, forty", code: [0,7,0,2,0,0,0,4,0] },
-            { text: "Expanded Form: 600,000,000 + 50,000,000 + 1,000,000 + 2", code: [6,5,1,0,0,0,0,0,2] }
+            { text: "Word Form: Fifty-two million, four hundred thousand", hint: "Hint: 52 in the millions period. 400 in thousands.", code: [0,5,2,4,0,0,0,0,0] },
+            { text: "Expanded Form: 100,000,000 + 20,000,000 + 5,000", hint: "Hint: 120 in the millions period.", code: [1,2,0,0,0,5,0,0,0] },
+            { text: "Word Form: Three hundred million, six thousand, ten", hint: "Hint: Check the zeros in the thousands period carefully.", code: [3,0,0,0,0,6,0,1,0] },
+            { text: "Expanded Form: 80,000,000 + 4,000,000 + 900,000 + 7", hint: "Hint: 84 goes in the millions period.", code: [0,8,4,9,0,0,0,0,7] },
+            { text: "Word Form: Nine hundred ninety million, nine", hint: "Hint: 990 in the millions period. 9 in the ones place.", code: [9,9,0,0,0,0,0,0,9] },
+            { text: "Expanded Form: 400,000,000 + 60,000 + 300 + 80", hint: "Hint: Watch out for the empty millions digits.", code: [4,0,0,0,6,0,3,8,0] },
+            { text: "Word Form: Seventy million, two hundred thousand, forty", hint: "Hint: 70 in the millions. 200 in the thousands.", code: [0,7,0,2,0,0,0,4,0] },
+            { text: "Expanded Form: 600,000,000 + 50,000,000 + 1,000,000 + 2", hint: "Hint: 651 goes in the millions period.", code: [6,5,1,0,0,0,0,0,2] }
         ];
 
-        // --- GAME FUNCTIONS --- //
+        function playAudio(id) {
+            let audio = document.getElementById(id);
+            if(audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e=>{});
+            }
+        }
+
         function showStartScreen() {
             document.getElementById("start-screen").style.display = "block";
             document.getElementById("game-screen").style.display = "none";
             document.getElementById("end-screen").style.display = "none";
+            let vAudio = document.getElementById('audio-victory');
+            if(vAudio) vAudio.pause();
         }
 
         function startGame(difficulty) {
@@ -348,7 +430,15 @@
             document.getElementById("game-screen").style.display = "block";
             
             currentLevel = 0;
+            lives = 3;
+            updateHUD();
             loadMission();
+        }
+
+        function updateHUD() {
+            let hearts = "";
+            for(let i=0; i<lives; i++) hearts += "🚨";
+            document.getElementById('lives-display').innerText = hearts;
         }
 
         function updateDisplay() {
@@ -359,7 +449,7 @@
 
         function changeDigit(index, amount) {
             if(isLevelComplete) return; 
-            
+            playAudio('audio-click');
             let newValue = currentCode[index] + amount;
             if (newValue > 9) newValue = 0;
             if (newValue < 0) newValue = 9;
@@ -377,8 +467,15 @@
             document.getElementById("feedback").innerText = "";
             
             let actionBtn = document.getElementById("action-btn");
-            actionBtn.innerText = "🔓 UNLOCK";
+            actionBtn.innerText = "UNLOCK";
             actionBtn.className = "";
+        }
+
+        function showHint() {
+            if(isLevelComplete) return;
+            let feedback = document.getElementById("feedback");
+            feedback.innerText = activeMissions[currentLevel].hint;
+            feedback.className = "hint-text";
         }
 
         function handleAction() {
@@ -402,23 +499,58 @@
 
                 let feedback = document.getElementById("feedback");
                 if (isCorrect) {
+                    playAudio('audio-lock');
                     feedback.innerText = "✅ VAULT CRACKED!";
                     feedback.className = "correct";
                     isLevelComplete = true;
                     
                     let actionBtn = document.getElementById("action-btn");
-                    actionBtn.innerText = "Next Vault ➡️";
+                    actionBtn.innerText = "NEXT VAULT";
                     actionBtn.className = "next-level";
                 } else {
-                    feedback.innerText = "❌ INCORRECT! Check your zeros.";
+                    playAudio('audio-alarm');
+                    
+                    let wrapper = document.getElementById('game-wrapper');
+                    let laser = document.getElementById('laser-overlay');
+                    
+                    wrapper.classList.add('shake-error');
+                    laser.style.display = 'block';
+                    
+                    lives--;
+                    updateHUD();
+                    feedback.innerText = "❌ SECURITY TRIGGERED!";
                     feedback.className = "incorrect";
+
+                    setTimeout(() => { 
+                        wrapper.classList.remove('shake-error'); 
+                        laser.style.display = 'none';
+                        if(lives <= 0) loseGame();
+                    }, 500);
                 }
             }
+        }
+
+        function loseGame() {
+            document.getElementById("game-screen").style.display = "none";
+            document.getElementById("end-screen").style.display = "block";
+            
+            let title = document.getElementById("end-title");
+            title.innerText = "CAUGHT!";
+            title.style.color = "#e74c3c";
+            
+            document.getElementById("end-desc").innerText = "The alarms went off and the vault locked down. Review your place values and try the heist again!";
         }
 
         function winGame() {
             document.getElementById("game-screen").style.display = "none";
             document.getElementById("end-screen").style.display = "block";
+            
+            let title = document.getElementById("end-title");
+            title.innerText = "ALL VAULTS CRACKED!";
+            title.style.color = "#f1c40f";
+            document.getElementById("end-desc").innerText = "You are a Place Value Master! Enjoy the loot!";
+
+            playAudio('audio-victory');
             triggerMoneyRain();
         }
 
@@ -428,19 +560,15 @@
                 money.innerText = Math.random() > 0.5 ? "💵" : "💰";
                 money.className = "money-particle";
                 
-                // Randomize starting position across the screen width
                 money.style.left = Math.random() * 100 + "vw";
-                
-                // Randomize speed and delay for a natural falling effect
-                let duration = Math.random() * 3 + 2; // Between 2 and 5 seconds
-                let delay = Math.random() * 2; // Up to 2 seconds delay
+                let duration = Math.random() * 3 + 2; 
+                let delay = Math.random() * 2; 
                 
                 money.style.animationDuration = duration + "s";
                 money.style.animationDelay = delay + "s";
                 
                 document.body.appendChild(money);
                 
-                // Remove the money from the screen after it finishes falling to prevent clutter
                 setTimeout(() => {
                     money.remove();
                 }, (duration + delay) * 1000);
