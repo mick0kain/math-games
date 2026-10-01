@@ -74,7 +74,7 @@
         /* Central Algorithm Visual Board */
         #math-problem-container {
             position: absolute;
-            top: 80px;
+            top: 90px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0, 0, 0, 0.85);
@@ -82,7 +82,7 @@
             border-radius: 15px;
             border: 5px solid #3498db;
             box-shadow: 0 15px 30px rgba(0,0,0,0.8);
-            z-index: 4;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -93,20 +93,49 @@
         }
 
         .math-span { display: inline-block; width: 35px; text-align: center; }
-        .carry-font { font-size: 0.6em; line-height: 1; color: #e74c3c; } /* Red Carries */
-        .cyan-text { color: #00d2d3; } /* Step 1 */
-        .magenta-text { color: #ff9ff3; } /* Step 2 */
-        .yellow-text { color: #feca57; } /* Final Sum */
+        .carry-font { font-size: 0.6em; line-height: 1; color: #e74c3c; } 
+        .cyan-text { color: #00d2d3; } 
+        .magenta-text { color: #ff9ff3; } 
+        .yellow-text { color: #feca57; } 
 
-        /* The Arena */
-        .arena { flex-grow: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding-top: 10px; }
+        /* The Arena Layout */
+        .arena { flex-grow: 1; position: relative; overflow: hidden; }
         
-        #target-asteroid { width: 120px; height: 120px; background-image: url('asteroid.png'); background-size: cover; background-position: center; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); z-index: 3; transition: transform 0.1s; }
+        #target-asteroid { 
+            position: absolute; 
+            top: 20px; 
+            left: 50%; /* Overridden by JS */
+            margin-left: -60px; /* Offset for perfect centering on coordinates */
+            width: 120px; height: 120px; 
+            background-image: url('asteroid.png'); 
+            background-size: cover; background-position: center; 
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); 
+            z-index: 3; 
+            transition: left 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.1s; 
+        }
         
-        /* Spaceship (Enlarged) */
-        #spaceship { width: 220px; height: auto; z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9)); margin-bottom: 20px; }
+        /* Spaceship (Enlarged and dynamic) */
+        #spaceship { 
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            width: 220px; height: auto; 
+            z-index: 5; 
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9)); 
+            transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
         
-        #laser-beam { position: absolute; bottom: 210px; left: 50%; transform: translateX(-50%); width: 8px; height: 0; background-color: #2ecc71; box-shadow: 0 0 15px #2ecc71, 0 0 30px #2ecc71; z-index: 4; transition: height 0.1s ease; }
+        #laser-beam { 
+            position: absolute; 
+            bottom: 180px; 
+            left: 50%; 
+            width: 8px; height: 0; 
+            background-color: #2ecc71; 
+            box-shadow: 0 0 15px #2ecc71, 0 0 30px #2ecc71; 
+            z-index: 4; 
+            transform-origin: bottom center;
+            transition: height 0.1s ease, transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
         .shake-error { animation: shake 0.4s; }
@@ -172,7 +201,6 @@
                 <div class="scoreboard" id="score-display">WAVE: 1/3</div>
             </div>
 
-            <!-- Central Math Board -->
             <div id="math-problem-container">
                 <div id="row-carry2" class="carry-font"></div>
                 <div id="row-carry1" class="carry-font"></div>
@@ -183,12 +211,13 @@
                 <div id="row-sum" class="yellow-text" style="border-top: 4px solid white; display:none;"></div>
             </div>
 
+            <!-- Modified Arena -->
             <div class="arena" id="arena-box">
                 <div id="target-asteroid"></div>
+                <div id="laser-beam"></div>
                 <img src="spaceship.png" alt="Spaceship" id="spaceship">
             </div>
 
-            <!-- Smartboard Controls -->
             <div class="controls">
                 <div class="left-controls">
                     <div class="prompt-text" id="step-prompt">Step prompt goes here...</div>
@@ -214,8 +243,6 @@
                     <button class="key-btn key-red" onclick="pressKey('B')">⌫</button>
                 </div>
             </div>
-
-            <div id="laser-beam"></div>
         </div>
 
         <div id="end-screen" class="menu-overlay">
@@ -237,8 +264,8 @@
         
         let loopAnim; 
         let laserTimeout = null;
+        let isTargetRight = false; // Toggled when wave starts
 
-        // Grid Data Strings (6 chars wide)
         let grid = {
             c2: "      ",
             c1: "      ",
@@ -261,7 +288,6 @@
             document.getElementById(elementId).innerHTML = html;
         }
 
-        // Physical Keyboard Support
         document.addEventListener('keydown', (e) => {
             if (document.getElementById('game-screen').style.display === 'flex') {
                 if (e.key >= '0' && e.key <= '9') pressKey(e.key);
@@ -271,7 +297,6 @@
             }
         });
 
-        // Smartboard Keypad Logic
         function pressKey(val) {
             let input = document.getElementById('player-input');
             if (val === 'C') {
@@ -279,7 +304,7 @@
             } else if (val === 'B') {
                 input.value = input.value.slice(0, -1);
             } else {
-                if (input.value.length < 8) { // Prevent overly long entries
+                if (input.value.length < 8) { 
                     input.value += val;
                 }
             }
@@ -328,6 +353,7 @@
 
             questions = generateQuestions(difficulty);
             currentWave = 0;
+            isTargetRight = false; // Reset side tracker
             loadNextWave();
         }
 
@@ -337,11 +363,39 @@
             if (sfx) { sfx.pause(); sfx.currentTime = 0; }
         }
 
+        // Handles the alternating sides for Ship & Asteroid
+        function updateArenaPositions() {
+            let ast = document.getElementById('target-asteroid');
+            let ship = document.getElementById('spaceship');
+            let laser = document.getElementById('laser-beam');
+
+            if (isTargetRight) {
+                // Move Asteroid to Top-Right
+                ast.style.left = '85%';
+                // Aim Ship Right
+                ship.style.transform = 'translateX(-50%) rotate(35deg)';
+                // Aim Laser Right
+                laser.style.transform = 'translateX(-50%) rotate(35deg)';
+            } else {
+                // Move Asteroid to Top-Left
+                ast.style.left = '15%';
+                // Flip Ship horizontally AND aim Left
+                ship.style.transform = 'translateX(-50%) scaleX(-1) rotate(35deg)';
+                // Aim Laser Left (Laser doesn't need to flip, just rotate)
+                laser.style.transform = 'translateX(-50%) rotate(-35deg)';
+            }
+        }
+
         function loadNextWave() {
             if(currentWave >= maxWaves) {
                 endGame();
                 return;
             }
+            
+            // Toggle Asteroid Direction on new wave!
+            isTargetRight = !isTargetRight;
+            updateArenaPositions();
+
             activeQ = questions[currentWave];
             currentStep = 1;
             
@@ -487,7 +541,8 @@
             let audio = document.getElementById('audio-laser');
             
             if(audio) { stopLaserAudio(); audio.play().catch(e=>{}); laserTimeout = setTimeout(()=>stopLaserAudio(), 1500); }
-            laser.style.height = '400px'; 
+            
+            laser.style.height = '650px'; // Reaches into the corner perfectly
             ast.style.transform = 'scale(0.8) rotate(10deg) brightness(200%)';
             
             setTimeout(() => {
