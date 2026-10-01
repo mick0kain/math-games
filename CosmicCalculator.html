@@ -78,7 +78,7 @@
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0, 0, 0, 0.85);
-            padding: 20px 40px;
+            padding: 15px 30px;
             border-radius: 15px;
             border: 5px solid #3498db;
             box-shadow: 0 15px 30px rgba(0,0,0,0.8);
@@ -87,7 +87,7 @@
             flex-direction: column;
             align-items: flex-end;
             font-family: 'Press Start 2P', monospace;
-            font-size: 2.5em;
+            font-size: 2.2em;
             line-height: 1.5;
             letter-spacing: 5px;
         }
@@ -102,24 +102,34 @@
         .arena { flex-grow: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding-top: 10px; }
         
         #target-asteroid { width: 120px; height: 120px; background-image: url('asteroid.png'); background-size: cover; background-position: center; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); z-index: 3; transition: transform 0.1s; }
-        #spaceship { width: 160px; height: auto; z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9)); margin-bottom: 20px; }
         
-        #laser-beam { position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%); width: 8px; height: 0; background-color: #2ecc71; box-shadow: 0 0 15px #2ecc71, 0 0 30px #2ecc71; z-index: 4; transition: height 0.1s ease; }
+        /* Spaceship (Enlarged) */
+        #spaceship { width: 220px; height: auto; z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9)); margin-bottom: 20px; }
+        
+        #laser-beam { position: absolute; bottom: 210px; left: 50%; transform: translateX(-50%); width: 8px; height: 0; background-color: #2ecc71; box-shadow: 0 0 15px #2ecc71, 0 0 30px #2ecc71; z-index: 4; transition: height 0.1s ease; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
         .shake-error { animation: shake 0.4s; }
 
-        /* Controls */
-        .controls { background-color: rgba(20, 20, 20, 0.98); padding: 25px; border-top: 4px solid #fff; display: flex; flex-direction: column; align-items: center; z-index: 5; }
-        .prompt-text { font-size: 1.5em; margin-bottom: 15px; font-weight: bold; text-shadow: 2px 2px 0 #000; transition: color 0.3s; }
+        /* Controls Redesign (Smartboard Friendly) */
+        .controls { background-color: rgba(20, 20, 20, 0.98); padding: 20px 30px; border-top: 4px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+        
+        .left-controls { display: flex; flex-direction: column; align-items: flex-start; max-width: 55%; }
+        .prompt-text { font-size: 1.3em; margin-bottom: 15px; font-weight: bold; text-shadow: 2px 2px 0 #000; transition: color 0.3s; text-align: left; line-height: 1.4; }
         
         .input-group { display: flex; gap: 15px; align-items: center; }
-        #player-input { font-size: 2em; padding: 10px; width: 150px; text-align: center; border-radius: 8px; border: 3px solid #3498db; font-weight: bold; }
+        #player-input { font-size: 2em; padding: 10px; width: 140px; text-align: center; border-radius: 8px; border: 3px solid #3498db; font-weight: bold; background-color: #fff; color: #000; pointer-events: none; }
         
-        .action-btn { background-color: #e74c3c; color: white; font-family: 'Press Start 2P', cursive; font-size: 1.2em; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 0 #c0392b; transition: 0.1s; }
+        .action-btn { background-color: #e74c3c; color: white; font-family: 'Press Start 2P', cursive; font-size: 1em; padding: 15px 25px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 0 #c0392b; transition: 0.1s; }
         .action-btn:active { transform: translateY(6px); box-shadow: none; }
-        
-        .hint-btn { background-color: #f39c12; box-shadow: 0 6px 0 #d35400; padding: 15px 20px; }
+        .hint-btn { background-color: #f39c12; box-shadow: 0 6px 0 #d35400; }
+
+        /* On-Screen Keypad */
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key-btn { background-color: #34495e; color: white; border: 3px solid #2c3e50; padding: 15px; font-size: 1.2em; font-family: 'Press Start 2P', cursive; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 0 #2c3e50; transition: 0.1s; }
+        .key-btn:active { transform: translateY(4px); box-shadow: none; background-color: #7f8c8d; }
+        .key-red { background-color: #c0392b; border-color: #900; box-shadow: 0 4px 0 #900; }
+        .key-red:active { background-color: #e74c3c; }
 
         /* End Screen */
         #end-screen { display: none; }
@@ -149,7 +159,7 @@
                 <p>🚀 Formulate coordinates for your spaceship by using the <span>Standard Algorithm</span>.</p>
                 <p>📝 Answer each step one-by-one. Don't forget your <span>carries</span> and <span>zero placeholders</span>!</p>
                 <p>💡 Use the <span>HINT</span> button if you get stuck on a calculation step.</p>
-                <p>🎯 Enter the correct step and fire your laser to lock in the calculation.</p>
+                <p>🎯 Punch your answer into the keypad and hit FIRE to lock in the calculation.</p>
             </div>
             <div class="difficulty-buttons">
                 <button class="diff-btn btn-easy" onclick="startGame('easy')">EASY (x 1-Digit)</button>
@@ -178,12 +188,30 @@
                 <img src="spaceship.png" alt="Spaceship" id="spaceship">
             </div>
 
+            <!-- Smartboard Controls -->
             <div class="controls">
-                <div class="prompt-text" id="step-prompt">Step prompt goes here...</div>
-                <div class="input-group">
-                    <input type="number" id="player-input" placeholder="?">
-                    <button class="action-btn hint-btn" onclick="showHint()" type="button">HINT</button>
-                    <button class="action-btn" onclick="checkAnswer()" type="button">FIRE!</button>
+                <div class="left-controls">
+                    <div class="prompt-text" id="step-prompt">Step prompt goes here...</div>
+                    <div class="input-group">
+                        <input type="text" id="player-input" placeholder="?" readonly>
+                        <button class="action-btn hint-btn" onclick="showHint()" type="button">HINT</button>
+                        <button class="action-btn" onclick="checkAnswer()" type="button">FIRE!</button>
+                    </div>
+                </div>
+                
+                <div class="keypad-grid">
+                    <button class="key-btn" onclick="pressKey('7')">7</button>
+                    <button class="key-btn" onclick="pressKey('8')">8</button>
+                    <button class="key-btn" onclick="pressKey('9')">9</button>
+                    <button class="key-btn" onclick="pressKey('4')">4</button>
+                    <button class="key-btn" onclick="pressKey('5')">5</button>
+                    <button class="key-btn" onclick="pressKey('6')">6</button>
+                    <button class="key-btn" onclick="pressKey('1')">1</button>
+                    <button class="key-btn" onclick="pressKey('2')">2</button>
+                    <button class="key-btn" onclick="pressKey('3')">3</button>
+                    <button class="key-btn key-red" onclick="pressKey('C')">C</button>
+                    <button class="key-btn" onclick="pressKey('0')">0</button>
+                    <button class="key-btn key-red" onclick="pressKey('B')">⌫</button>
                 </div>
             </div>
 
@@ -231,6 +259,30 @@
                 html += `<span class="math-span">${char === ' ' ? '&nbsp;' : char}</span>`;
             }
             document.getElementById(elementId).innerHTML = html;
+        }
+
+        // Physical Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('game-screen').style.display === 'flex') {
+                if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+                if (e.key === 'Backspace') pressKey('B');
+                if (e.key === 'Escape' || e.key.toLowerCase() === 'c') pressKey('C');
+                if (e.key === 'Enter') checkAnswer();
+            }
+        });
+
+        // Smartboard Keypad Logic
+        function pressKey(val) {
+            let input = document.getElementById('player-input');
+            if (val === 'C') {
+                input.value = "";
+            } else if (val === 'B') {
+                input.value = input.value.slice(0, -1);
+            } else {
+                if (input.value.length < 8) { // Prevent overly long entries
+                    input.value += val;
+                }
+            }
         }
 
         function generateQuestions(difficulty) {
@@ -322,9 +374,7 @@
 
         function loadStepPrompt() {
             let pEl = document.getElementById('step-prompt');
-            let inputField = document.getElementById('player-input');
-            inputField.value = "";
-            inputField.focus();
+            document.getElementById('player-input').value = "";
 
             let promptText = "";
             let hintText = "";
@@ -405,7 +455,10 @@
         }
 
         function checkAnswer() {
-            let userInput = parseInt(document.getElementById('player-input').value);
+            let val = document.getElementById('player-input').value;
+            if (val === "") return; 
+            
+            let userInput = parseInt(val);
             
             if (userInput === activeQ.expected) {
                 fireLaserAndUpdate();
@@ -418,6 +471,7 @@
                 
                 pEl.innerText = "❌ Missed! Recalculate!";
                 pEl.style.color = "#e74c3c";
+                document.getElementById('player-input').value = "";
                 
                 setTimeout(() => { 
                     wrapper.classList.remove('shake-error'); 
@@ -426,10 +480,6 @@
                 }, 1000);
             }
         }
-
-        document.getElementById("player-input").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") { event.preventDefault(); checkAnswer(); }
-        });
 
         function fireLaserAndUpdate() {
             let laser = document.getElementById('laser-beam');
@@ -499,6 +549,7 @@
                 let pEl = document.getElementById('step-prompt');
                 pEl.innerText = "⭐ COORDINATES LOCKED! ⭐";
                 pEl.style.color = "#ffffff";
+                document.getElementById('player-input').value = "";
                 
                 setTimeout(() => {
                     currentWave++;
